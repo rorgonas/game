@@ -1,0 +1,11 @@
+.canvas-container {
+  background: #bbada0;
+  border-radius: 6px;
+  width: 500px;
+  height: 500px;
+  margin: auto;
+}
+
+#canvas {
+  background-color: #776e65;
+}
