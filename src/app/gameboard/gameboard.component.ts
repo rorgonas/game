@@ -15,8 +15,9 @@ export class GameBoardComponent implements AfterViewInit {
   size = 4;
   width: number;
   cells = [];
-  fontSize: number;
-  loss: boolean;
+  fontSize = 0;
+  loss = false;
+  message: string;
   @ViewChild('canvasBlock') myCanvas;
 
   ngAfterViewInit() {
@@ -41,13 +42,13 @@ export class GameBoardComponent implements AfterViewInit {
   }
 
   finishGame() {
-    alert('The End');
     this.loss = false;
+    this.message = 'Sorry, you lost! Try again.';
   }
 
   cell(row, coll) {
     return {
-      value: row,
+      value: 0,
       x: coll * this.width + 5 * (coll + 1 ),
       y: row * this.width + 5 * (row + 1 )
     };
@@ -68,8 +69,7 @@ export class GameBoardComponent implements AfterViewInit {
     ctx.rect(cell.x, cell.y, this.width, this.width);
 
     switch (cell.value) {
-      case 0: ctx.fillStyle = '#DDDF0D'; break;
-      case 1: ctx.fillStyle = '#DF5353'; break;
+      case 0: ctx.fillStyle = '#fffff'; break;
       case 2: ctx.fillStyle = '#eee4da'; break;
       case 4: ctx.fillStyle = '#ede0c8'; break;
       case 8: ctx.fillStyle = '#f2b179'; break;
@@ -81,15 +81,16 @@ export class GameBoardComponent implements AfterViewInit {
       case 512: ctx.fillStyle = '#edc850'; break;
       case 1024: ctx.fillStyle = '#edc53f'; break;
       case 2048: ctx.fillStyle = '#edc22e'; break;
-      default: ctx.fillStyle = '#3c3a32';
+      default: ctx.fillStyle = '#eee4da';
     }
 
     ctx.fill();
     if (cell.value) {
       this.fontSize = this.width / 2;
-      ctx.font = this.fontSize + 'px Arial';
+      ctx.font = 'bold ' + this.fontSize + 'px Arial';
       ctx.fillStyle = '#776e65';
       ctx.textAlign = 'center';
+      ctx.fillText(cell.value, cell.x + this.width / 2, cell.y + this.width / 2 );
     }
   }
 
@@ -104,12 +105,13 @@ export class GameBoardComponent implements AfterViewInit {
   pasteNewCell() {
     let countFree = 0;
     for ( let i = 0; i < this.size; i++ ) {
-      for ( let j = this.size; j < this.size; j++ ) {
+      for ( let j = 0; j < this.size; j++ ) {
         if (!this.cells[i][j].value) {
           countFree++;
         }
       }
     }
+    console.log('Count: ', countFree);
     if (!countFree) {
       this.finishGame();
       return;
@@ -117,8 +119,9 @@ export class GameBoardComponent implements AfterViewInit {
     while (true) {
       const row = Math.floor(Math.random() * this.size);
       const coll = Math.floor(Math.random() * this.size);
-      if (!this.cells[row][coll].vlaue) {
-        this.cells[row][coll].vlaue = 2 * Math.ceil(Math.random() * 2);
+      const cell = this.cells[row][coll];
+      if (!cell.vlaue) {
+        Object.assign(cell, { value:  2 * Math.ceil(Math.random() * 2) });
         this.drawAllCells();
         return;
       }
@@ -145,7 +148,7 @@ export class GameBoardComponent implements AfterViewInit {
 
   moveUp() {
     for ( let j = 0; j < this.size; j++ ) {
-      for ( let i = 0; i < this.size; i++ ) {
+      for ( let i = 1; i < this.size; i++ ) {
         if (this.cells[i][j].value) {
           let row = i;
           while (row > 0) {
@@ -153,7 +156,7 @@ export class GameBoardComponent implements AfterViewInit {
               this.cells[row - 1][j].value = this.cells[row][j].value;
               this.cells[row][j].value = 0;
               row --;
-            } else if (this.cells[row - 1][j].value = this.cells[row][j].value) {
+            } else if (this.cells[row - 1][j].value === this.cells[row][j].value) {
               this.cells[row - 1][j].value *= 2;
               this.score += this.cells[row - 1][j].value;
               this.cells[row][j].value = 0;
@@ -174,11 +177,12 @@ export class GameBoardComponent implements AfterViewInit {
         if (this.cells[i][j].value) {
           let coll = j;
           while (coll + 1 < this.size) {
+            debugger;
             if (!this.cells[i][coll + 1].value) {
               this.cells[i][coll + 1].value = this.cells[i][coll].value;
               this.cells[i][coll].value = 0;
               coll ++;
-            } else if (this.cells[i][coll].value = this.cells[i][coll + 1].value) {
+            } else if (this.cells[i][coll].value === this.cells[i][coll + 1].value) {
               this.cells[i][coll + 1].value *= 2;
               this.score += this.cells[i][coll + 1].value;
               this.cells[i][coll].value = 0;
@@ -203,7 +207,7 @@ export class GameBoardComponent implements AfterViewInit {
               this.cells[row + 1][j].value = this.cells[row][j].value;
               this.cells[row][j].value = 0;
               row ++;
-            } else if (this.cells[row + 1][j].value = this.cells[row][j].value) {
+            } else if (this.cells[row + 1][j].value === this.cells[row][j].value) {
               this.cells[row + 1][j].value *= 2;
               this.score += this.cells[row + 1][j].value;
               this.cells[row][j].value = 0;
@@ -220,7 +224,7 @@ export class GameBoardComponent implements AfterViewInit {
 
   moveLeft() {
     for ( let i = 0; i < this.size; i++ ) {
-      for ( let j = 0; j < this.size; j++ ) {
+      for ( let j = 1; j < this.size; j++ ) {
         if (this.cells[i][j].value) {
           let coll = j;
           while (coll - 1 >= 0) {
@@ -228,7 +232,7 @@ export class GameBoardComponent implements AfterViewInit {
               this.cells[i][coll - 1].value = this.cells[i][coll].value;
               this.cells[i][coll].value = 0;
               coll --;
-            } else if (this.cells[i][coll].value = this.cells[i][coll - 1].value) {
+            } else if (this.cells[i][coll].value === this.cells[i][coll - 1].value) {
               this.cells[i][coll - 1].value *= 2;
               this.score += this.cells[i][coll - 1].value;
               this.cells[i][coll].value = 0;
