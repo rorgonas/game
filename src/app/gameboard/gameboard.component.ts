@@ -177,7 +177,6 @@ export class GameBoardComponent implements AfterViewInit {
         if (this.cells[i][j].value) {
           let coll = j;
           while (coll + 1 < this.size) {
-            debugger;
             if (!this.cells[i][coll + 1].value) {
               this.cells[i][coll + 1].value = this.cells[i][coll].value;
               this.cells[i][coll].value = 0;
